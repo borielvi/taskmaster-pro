@@ -91,17 +91,20 @@ $(".card .list-group").sortable({
   helper: "clone",
 
   activate: function(event) {
-    console.log("activate", this);
+    $(this).addClass('dropover');
+    $(event).addClass('bottom-trash-drag');
   },
   deactivate: function(event) {
-    console.log("deactivate", this);
+    $(this).removeClass('dropover');
+    $(event).removeClass('bottom-trash-drag');
   },
   over: function(event) {
-    console.log("over", event.target);
+    $(event).addClass('dropover-active');
   },
   out: function(event) {
-    console.log("out", event.target);
+    $(event).removeClass('dropover-active');
   },
+  
 
   update: function(event) {
     // loop over current set of children in sortable list
@@ -131,7 +134,7 @@ $(".card .list-group").sortable({
     .attr("id")
     .replace("list-", "");
 
-    // update array on tasks object and save
+    // update array on tasks object and-save
     tasks[arrName] = tempArr;
     saveTasks();
   }
@@ -161,14 +164,19 @@ $("#trash").droppable({
   accept: ".card .list-group-item",
   tolerance: "touch",
   drop: function(event, ui) {
-    ui.draggable.remove();
-    console.log("drop");
+    ui.draggable.remove();  
+    //$(bottom-trash).removeClass('bottom-trash-active');
+    $(event-target).removeclass('bottom-trash-active');
   },
   over: function(event, ui) {
-    console.log("over");
+    //$(bottom-trash).addClass('bottom-trash-active');
+    $(event-target).addclass('bottom-trash-active');
+    ui.draggable.add();
   },
   out: function(event, ui) {
-    console.log("out");
+    //$(bottom-trash).removeClass('bottom-trash-active');
+    ui.draggable.remove();
+    $(event-target).removeclass('bottom-trash-active');
   }
 });
 
@@ -219,7 +227,6 @@ $(".list-group").on("click", "p", function() {
 
 });
 
-
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
   // clear values
@@ -235,8 +242,8 @@ $("#task-form-modal").on("shown.bs.modal", function() {
   $("#modalTaskDescription").trigger("focus");
 });
 
-// save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+//-save button in modal was clicked
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
 
@@ -248,11 +255,13 @@ $("#task-form-modal .btn-primary").click(function() {
     // close modal
     $("#task-form-modal").modal("hide");
 
-    // save in tasks array
+    //-save in tasks array
+    if(tasks.toDo){
     tasks.toDo.push({
       text: taskText,
       date: taskDate
     });
+    }
     
     saveTasks();
   }
@@ -266,6 +275,12 @@ $("#remove-tasks").on("click", function() {
   }
   saveTasks();
 });
+
+setInterval(function () {
+  $(".card .list-group-item").each(function (el) {
+    auditTask(el);
+  });
+}, (1000 * 60) * 30);
 
 // load tasks for the first time
 loadTasks();
